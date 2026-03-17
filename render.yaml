@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: cejo-ipam
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: CEJO_API_KEY
+        value: cejo-api-2024
+      - key: DB_PATH
+        value: /tmp/cejo.db
+      - key: PORT
+        value: 5000
+    healthCheckPath: /health
+    autoDeploy: true
+    plan: free

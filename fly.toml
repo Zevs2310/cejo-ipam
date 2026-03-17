@@ -1,0 +1,21 @@
+app = "cejo-ipam"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  CEJO_API_KEY = "cejo-api-2024"
+  DB_PATH = "/tmp/cejo.db"
+
+[http_service]
+  internal_port = 5000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
