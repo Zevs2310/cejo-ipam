@@ -715,11 +715,11 @@ pre.code{
         Content-Type    →  application/json
       Request Body:
         {
-          "network_cidr": "{{trigger.network_cidr}}",
-          "device_name":  "{{trigger.ci_name}}",
-          "device_type":  "{{trigger.device_type}}",
-          "owner":        "{{trigger.requested_for.user_name}}",
-          "description":  "Allocated via Flow: {{flow.name}}"
+          "network_cidr": "{% raw %}{{trigger.network_cidr}}{% endraw %}",
+          "device_name":  "{% raw %}{{trigger.ci_name}}{% endraw %}",
+          "device_type":  "{% raw %}{{trigger.device_type}}{% endraw %}",
+          "owner":        "{% raw %}{{trigger.requested_for.user_name}}{% endraw %}",
+          "description":  "Allocated via Flow: {% raw %}{{flow.name}}{% endraw %}"
         }
     ───────────────────────────────────────────────────────────
     Step 2: Script (parse response)
@@ -1088,4 +1088,3 @@ loadSelectsOnly();
 </script>
 </body>
 </html>
-
