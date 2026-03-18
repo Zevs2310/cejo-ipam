@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+{% raw %}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;font-size:14px;background:#f3f4f6;color:#111827;min-height:100vh;display:flex}
 button{cursor:pointer;font-family:'Inter',sans-serif}
@@ -147,7 +148,8 @@ pre.code{background:#1e2d3d;border-radius:8px;padding:16px;font-family:'JetBrain
 #toast.show{transform:translateY(0);opacity:1}
 #toast.ok{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
 #toast.err{background:#fef2f2;border-color:#fecaca;color:#b91c1c}
-@media(max-width:900px){#sidebar{display:none}#main{margin-left:0}.kpi-row{grid-template-columns:repeat(3,1fr)}.console-grid{grid-template-columns:1fr}}
+@media(max-width:900px){#sidebar{display:none}#main{margin-left:0}.kpi-row{grid-template-columns:repeat(3,minmax(0,1fr))}.console-grid{grid-template-columns:minmax(0,1fr)}}
+{% endraw %}
 </style>
 </head>
 <body>
@@ -193,7 +195,7 @@ pre.code{background:#1e2d3d;border-radius:8px;padding:16px;font-family:'JetBrain
       <div class="page-sub" id="pageSub">Block → Network → Device hierarchy</div>
     </div>
     <div class="topbar-right">
-      <div class="api-key-chip">API Key: <strong id="apiKeyShow">{{ api_key }}</strong></div>
+      <div class="api-key-chip">API Key: <strong id="apiKeyShow">cejo-api-2024</strong></div>
       <button class="btn btn-outline btn-sm" onclick="refreshAll()">↻ Refresh</button>
     </div>
   </div>
@@ -694,4 +696,3 @@ loadTopology(); loadSelects();
 </script>
 </body>
 </html>
-
