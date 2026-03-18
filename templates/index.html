@@ -1,1 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CEJO IPAM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;font-size:14px;background:#f3f4f6;color:#111827;min-height:100vh;display:flex}
+button{cursor:pointer;font-family:'Inter',sans-serif}
+input,select{font-family:'Inter',sans-serif}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#f1f5f9}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+#sidebar{width:220px;min-width:220px;background:#1e2d3d;display:flex;flex-direction:column;min-height:100vh;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sb-brand{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo{display:flex;align-items:center;gap:10px}
+.sb-logo-box{width:34px;height:34px;border-radius:8px;background:#2563eb;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff}
+.sb-logo-name{font-size:15px;font-weight:600;color:#fff}
+.sb-logo-sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:1px}
+.sb-online{display:flex;align-items:center;gap:6px;margin-top:10px}
+.sb-dot{width:7px;height:7px;border-radius:50%;background:#22c55e}
+.sb-online-txt{font-size:11px;color:rgba(255,255,255,.4)}
+.sb-section{padding:16px 16px 5px;font-size:10px;color:rgba(255,255,255,.25);letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:6px;margin:1px 8px;font-size:13px;color:rgba(255,255,255,.5);cursor:pointer;transition:all .15s}
+.sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85)}
+.sb-item.active{background:#2563eb;color:#fff;font-weight:500}
+.sb-footer{margin-top:auto;padding:14px 16px;border-top:1px solid rgba(255,255,255,.07)}
+.sb-user{display:flex;align-items:center;gap:9px}
+.sb-avatar{width:30px;height:30px;border-radius:50%;background:#2563eb;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
+.sb-user-name{font-size:12px;color:rgba(255,255,255,.7);font-weight:500}
+.sb-user-role{font-size:10px;color:rgba(255,255,255,.3)}
+#main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+#topbar{background:#fff;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;position:sticky;top:0;z-index:50}
+.page-title{font-size:16px;font-weight:600;color:#111827}
+.page-sub{font-size:12px;color:#6b7280;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.api-key-chip{font-family:'JetBrains Mono',monospace;font-size:11px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:5px;padding:4px 9px;color:#64748b}
+.api-key-chip strong{color:#1e40af}
+#content{padding:24px;flex:1}
+.panel{display:none}
+.panel.active{display:block}
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px}
+.kpi-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px}
+.kpi-label{font-size:11px;color:#6b7280;font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.kpi-value{font-size:26px;font-weight:600;line-height:1;color:#111827}
+.kpi-value.blue{color:#2563eb}.kpi-value.green{color:#16a34a}.kpi-value.red{color:#dc2626}.kpi-value.amber{color:#d97706}.kpi-value.violet{color:#7c3aed}
+.kpi-sub{font-size:11px;color:#9ca3af;margin-top:5px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:14px;font-weight:600;color:#111827}
+.btn{padding:7px 14px;border-radius:7px;font-size:13px;font-weight:500;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:#2563eb;color:#fff}.btn-primary:hover{background:#1d4ed8}
+.btn-danger{background:#dc2626;color:#fff}.btn-danger:hover{background:#b91c1c}
+.btn-outline{background:#fff;color:#374151;border:1px solid #d1d5db}.btn-outline:hover{background:#f9fafb}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:5px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.filter-bar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.inp{background:#fff;border:1px solid #d1d5db;border-radius:7px;padding:7px 11px;font-size:13px;color:#111827;outline:none;transition:border-color .15s}
+.inp:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.sel{background:#fff;border:1px solid #d1d5db;border-radius:7px;padding:7px 11px;font-size:13px;color:#111827;outline:none;cursor:pointer}
+.sel:focus{border-color:#2563eb}
+.table-wrap{background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
+.table-header{padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;background:#f9fafb}
+.table-count{font-size:12px;color:#6b7280;font-weight:500}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;padding:10px 14px;text-align:left;background:#f9fafb;border-bottom:1px solid #e5e7eb}
+td{padding:11px 14px;border-bottom:1px solid #f3f4f6;font-size:13px;color:#111827;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f9fafb}
+.mono{font-family:'JetBrains Mono',monospace;font-size:11px}
+.text-muted{color:#6b7280}.text-sm{font-size:12px}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;border:1px solid}
+.b-computer{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+.b-server{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}
+.b-router{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}
+.b-switch{background:#fff7ed;color:#c2410c;border-color:#fed7aa}
+.b-firewall{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.b-gear{background:#fefce8;color:#a16207;border-color:#fde68a}
+.b-ap{background:#f0fdfa;color:#0f766e;border-color:#99f6e4}
+.block-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:14px;overflow:hidden}
+.block-head{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;transition:background .15s;border-bottom:1px solid #e5e7eb}
+.block-head:hover{background:#f9fafb}
+.block-icon{width:34px;height:34px;border-radius:8px;background:#eff6ff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.block-name{font-size:14px;font-weight:600;color:#111827}
+.block-cidr{font-family:'JetBrains Mono',monospace;font-size:12px;color:#2563eb;margin-top:1px}
+.block-arrow{color:#9ca3af;font-size:11px;transition:transform .2s;margin-left:4px}
+.block-card.open .block-arrow{transform:rotate(90deg)}
+.net-list{padding:10px 18px 14px;display:flex;flex-direction:column;gap:8px;background:#f9fafb}
+.net-row{background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden}
+.net-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .15s}
+.net-head:hover{background:#f9fafb}
+.net-cidr{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:#1d4ed8}
+.net-name{font-size:13px;font-weight:500;color:#111827}
+.vlan-chip{font-family:'JetBrains Mono',monospace;font-size:10px;background:#f5f3ff;color:#6d28d9;border:1px solid #ddd6fe;border-radius:3px;padding:1px 6px}
+.net-stats{margin-left:auto;display:flex;gap:6px}
+.stat-chip{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;border:1px solid}
+.sc-free{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}
+.sc-used{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+.sc-res{background:#fefce8;color:#a16207;border-color:#fde68a}
+.util-bar-wrap{padding:0 14px 8px}
+.util-bar{height:4px;background:#e5e7eb;border-radius:2px;overflow:hidden}
+.util-fill{height:100%;border-radius:2px;transition:width .5s}
+.uf-low{background:#22c55e}.uf-mid{background:#f59e0b}.uf-hi{background:#ef4444}
+.dev-tbl-wrap{display:none;padding:0 14px 12px}
+.dev-tbl-wrap.open{display:block}
+.dev-tbl{width:100%;border-collapse:collapse}
+.dev-tbl th{font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;padding:6px 8px;border-bottom:1px solid #f3f4f6;text-align:left}
+.dev-tbl td{padding:7px 8px;font-size:12px;border-bottom:1px solid #f9fafb;color:#111827}
+.dev-tbl tr:last-child td{border-bottom:none}
+.dev-tbl tr:hover td{background:#f9fafb}
+.no-devs{font-size:12px;color:#9ca3af;padding:8px 0}
+.form-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:16px}
+.form-card-head{padding:14px 18px;border-bottom:1px solid #e5e7eb;font-size:14px;font-weight:600;color:#111827;background:#f9fafb}
+.form-body{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-body .full{grid-column:1/-1}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.06em}
+.resp-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;min-height:60px;max-height:220px;overflow-y:auto;white-space:pre-wrap;margin-top:10px;color:#374151}
+.resp-box.ok{border-color:#bbf7d0;background:#f0fdf4;color:#15803d}
+.resp-box.err{border-color:#fecaca;background:#fef2f2;color:#b91c1c}
+.console-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.console-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}
+.console-head{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid #e5e7eb;background:#f9fafb}
+.method-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
+.m-post{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe}
+.m-get{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
+.ep-path{font-family:'JetBrains Mono',monospace;font-size:12px;color:#374151}
+.console-body{padding:14px}
+.sn-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:14px;overflow:hidden}
+.sn-card-head{padding:14px 18px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center}
+.sn-card-title{font-size:14px;font-weight:600;color:#111827}
+.sn-card-sub{font-size:12px;color:#6b7280;margin-top:1px}
+.sn-card-body{padding:18px}
+pre.code{background:#1e2d3d;border-radius:8px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.8;overflow-x:auto;color:#94a3b8;white-space:pre}
+.copy-btn{font-size:11px;font-family:'JetBrains Mono',monospace;background:#f1f5f9;border:1px solid #e2e8f0;color:#64748b;padding:4px 10px;border-radius:4px;cursor:pointer}
+.copy-btn:hover{background:#e2e8f0;color:#1e40af}
+.setup-steps{font-size:13px;color:#374151;line-height:2.2}
+.setup-steps b{color:#111827}
+.setup-steps code{font-family:'JetBrains Mono',monospace;font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;color:#1e40af}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;display:flex;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:12px;padding:24px;width:520px;max-width:95vw}
+.modal-head{font-size:16px;font-weight:600;color:#111827;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:none;border:none;font-size:20px;color:#9ca3af;cursor:pointer}
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;font-size:13px;padding:10px 16px;border-radius:8px;border:1px solid;transform:translateY(70px);opacity:0;transition:all .3s;pointer-events:none;font-weight:500}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.ok{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+#toast.err{background:#fef2f2;border-color:#fecaca;color:#b91c1c}
+@media(max-width:900px){#sidebar{display:none}#main{margin-left:0}.kpi-row{grid-template-columns:repeat(3,1fr)}.console-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">
+      <div class="sb-logo-box">CE</div>
+      <div>
+        <div class="sb-logo-name">CEJO IPAM</div>
+        <div class="sb-logo-sub">IP Network Orchestrator</div>
+      </div>
+    </div>
+    <div class="sb-online">
+      <div class="sb-dot" id="sbDot"></div>
+      <span class="sb-online-txt" id="sbStatus">Checking...</span>
+    </div>
+  </div>
+  <div class="sb-section">Main</div>
+  <div class="sb-item active" onclick="navTo('topology',this)">📊 Topology</div>
+  <div class="sb-item" onclick="navTo('devices',this)">🖥 All Devices</div>
+  <div class="sb-item" onclick="navTo('console',this)">⚡ API Console</div>
+  <div class="sb-item" onclick="navTo('servicenow',this)">🔗 ServiceNow</div>
+  <div class="sb-section">Create</div>
+  <div class="sb-item" onclick="navTo('add-block',this)">➕ Add Block</div>
+  <div class="sb-item" onclick="navTo('add-network',this)">➕ Add Network</div>
+  <div class="sb-item" onclick="navTo('add-device',this)">➕ Add Device</div>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar">AD</div>
+      <div>
+        <div class="sb-user-name">Admin</div>
+        <div class="sb-user-role">CEJO Administrator</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div id="main">
+  <div id="topbar">
+    <div>
+      <div class="page-title" id="pageTitle">Topology</div>
+      <div class="page-sub" id="pageSub">Block → Network → Device hierarchy</div>
+    </div>
+    <div class="topbar-right">
+      <div class="api-key-chip">API Key: <strong id="apiKeyShow">{{ api_key }}</strong></div>
+      <button class="btn btn-outline btn-sm" onclick="refreshAll()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <div id="panel-topology" class="panel active">
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-label">Blocks</div><div class="kpi-value blue" id="kBlocks">—</div></div>
+        <div class="kpi-card"><div class="kpi-label">Networks</div><div class="kpi-value blue" id="kNets">—</div></div>
+        <div class="kpi-card"><div class="kpi-label">Available IPs</div><div class="kpi-value green" id="kAvail">—</div></div>
+        <div class="kpi-card"><div class="kpi-label">Allocated IPs</div><div class="kpi-value red" id="kAlloc">—</div></div>
+        <div class="kpi-card"><div class="kpi-label">Devices</div><div class="kpi-value violet" id="kDevs">—</div></div>
+        <div class="kpi-card"><div class="kpi-label">Utilization</div><div class="kpi-value amber" id="kUtil">—</div><div class="kpi-sub">of address space</div></div>
+      </div>
+      <div class="sec-head">
+        <div class="sec-title">IP Block Hierarchy</div>
+        <button class="btn btn-outline btn-sm" onclick="loadTopology()">↻ Refresh</button>
+      </div>
+      <div id="topologyTree"><div style="color:#9ca3af;padding:20px;font-size:13px">Loading...</div></div>
+    </div>
+
+    <div id="panel-devices" class="panel">
+      <div class="sec-head">
+        <div class="sec-title">Device Registry</div>
+        <button class="btn btn-outline btn-sm" onclick="loadDevices()">↻ Refresh</button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" class="inp" id="devSearch" placeholder="Search name, IP, MAC..." style="width:240px" oninput="filterDevices()">
+        <select class="sel" id="devTypeFilter" onchange="filterDevices()">
+          <option value="">All Types</option>
+          <option>Computer</option><option>Server</option><option>Router</option>
+          <option>Switch</option><option>Firewall</option><option>Gear</option><option>AP</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="navTo('add-device',null)">+ Add Device</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-header"><span class="table-count" id="devCount">Loading...</span></div>
+        <table>
+          <thead><tr>
+            <th>Device Name</th><th>Type</th><th>IP Address</th><th>MAC Address</th>
+            <th>Network</th><th>Block</th><th>Owner</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="devTableBody"><tr><td colspan="8" style="color:#9ca3af;padding:20px">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="panel-add-block" class="panel">
+      <div class="form-card">
+        <div class="form-card-head">Create New IP Block</div>
+        <div class="form-body">
+          <div class="fg"><label>Block Name *</label><input class="inp" id="b-name" placeholder="Corporate LAN" style="width:100%"></div>
+          <div class="fg"><label>CIDR *</label><input class="inp" id="b-cidr" placeholder="10.0.0.0/8" style="width:100%"></div>
+          <div class="fg"><label>Location</label><input class="inp" id="b-loc" placeholder="HQ-Belgrade" style="width:100%"></div>
+          <div class="fg"><label>Description</label><input class="inp" id="b-desc" placeholder="Main address space" style="width:100%"></div>
+          <div class="full"><button class="btn btn-primary" onclick="doCreateBlock()">Create Block</button></div>
+        </div>
+      </div>
+      <div class="resp-box" id="b-resp" style="display:none"></div>
+    </div>
+
+    <div id="panel-add-network" class="panel">
+      <div class="form-card">
+        <div class="form-card-head">Create New Network / Subnet</div>
+        <div class="form-body">
+          <div class="fg"><label>Parent Block *</label><select class="sel" id="n-block" style="width:100%"><option value="">Loading...</option></select></div>
+          <div class="fg"><label>Network Name *</label><input class="inp" id="n-name" placeholder="Servers VLAN-10" style="width:100%"></div>
+          <div class="fg"><label>CIDR *</label><input class="inp" id="n-cidr" placeholder="10.0.10.0/24" style="width:100%"></div>
+          <div class="fg"><label>Gateway</label><input class="inp" id="n-gw" placeholder="10.0.10.1" style="width:100%"></div>
+          <div class="fg"><label>VLAN ID</label><input class="inp" id="n-vlan" type="number" placeholder="10" style="width:100%"></div>
+          <div class="fg"><label>Description</label><input class="inp" id="n-desc" placeholder="Production servers" style="width:100%"></div>
+          <div class="full"><button class="btn btn-primary" onclick="doCreateNetwork()">Create Network</button></div>
+        </div>
+      </div>
+      <div class="resp-box" id="n-resp" style="display:none"></div>
+    </div>
+
+    <div id="panel-add-device" class="panel">
+      <div class="form-card">
+        <div class="form-card-head">Add Device to Network</div>
+        <div class="form-body">
+          <div class="fg"><label>Network *</label><select class="sel" id="d-net" style="width:100%"><option value="">Loading...</option></select></div>
+          <div class="fg"><label>Device Name *</label><input class="inp" id="d-name" placeholder="sn-server-01" style="width:100%"></div>
+          <div class="fg"><label>Device Type *</label><select class="sel" id="d-type" style="width:100%"><option>Computer</option><option>Server</option><option>Router</option><option>Switch</option><option>Firewall</option><option>Gear</option><option>AP</option></select></div>
+          <div class="fg"><label>Specific IP (optional)</label><input class="inp" id="d-ip" placeholder="Auto-assign if blank" style="width:100%"></div>
+          <div class="fg"><label>Owner</label><input class="inp" id="d-owner" placeholder="Team or person" style="width:100%"></div>
+          <div class="fg"><label>Description</label><input class="inp" id="d-desc" placeholder="Purpose" style="width:100%"></div>
+          <div class="full"><button class="btn btn-primary" onclick="doAddDevice()">Add Device</button></div>
+        </div>
+      </div>
+      <div class="resp-box" id="d-resp" style="display:none"></div>
+    </div>
+
+    <div id="panel-console" class="panel">
+      <div class="console-grid">
+        <div class="console-card">
+          <div class="console-head"><span class="method-badge m-post">POST</span><span class="ep-path">/api/v1/allocate_ip</span></div>
+          <div class="console-body">
+            <div class="fg" style="margin-bottom:10px"><label>Network CIDR</label><select class="sel" id="c-alloc-net" style="width:100%"><option value="">Select...</option></select></div>
+            <div class="fg" style="margin-bottom:10px"><label>Device Name</label><input class="inp" id="c-alloc-dev" placeholder="my-device" style="width:100%"></div>
+            <div class="fg" style="margin-bottom:10px"><label>Device Type</label><select class="sel" id="c-alloc-type" style="width:100%"><option>Computer</option><option>Server</option><option>Router</option><option>Switch</option><option>Firewall</option><option>Gear</option><option>AP</option></select></div>
+            <div class="fg" style="margin-bottom:10px"><label>Specific IP (optional)</label><input class="inp" id="c-alloc-ip" placeholder="blank = auto" style="width:100%"></div>
+            <div class="fg" style="margin-bottom:12px"><label>Owner</label><input class="inp" id="c-alloc-owner" placeholder="team" style="width:100%"></div>
+            <button class="btn btn-primary btn-sm" onclick="cAllocate()">Allocate IP</button>
+            <div class="resp-box" id="c-alloc-r" style="display:none"></div>
+          </div>
+        </div>
+        <div class="console-card">
+          <div class="console-head"><span class="method-badge m-post">POST</span><span class="ep-path">/api/v1/release_ip</span></div>
+          <div class="console-body">
+            <div class="fg" style="margin-bottom:12px"><label>IP Address to Release</label><input class="inp" id="c-rel-ip" placeholder="10.0.10.20" style="width:100%"></div>
+            <button class="btn btn-danger btn-sm" onclick="cRelease()">Release IP</button>
+            <div class="resp-box" id="c-rel-r" style="display:none"></div>
+          </div>
+        </div>
+        <div class="console-card">
+          <div class="console-head"><span class="method-badge m-get">GET</span><span class="ep-path">/api/v1/lookup</span></div>
+          <div class="console-body">
+            <div class="fg" style="margin-bottom:10px"><label>Search by</label><select class="sel" id="c-lu-type" style="width:100%"><option value="ip">IP Address</option><option value="mac">MAC Address</option><option value="device">Device Name</option></select></div>
+            <div class="fg" style="margin-bottom:12px"><label>Value</label><input class="inp" id="c-lu-val" placeholder="Enter value..." style="width:100%"></div>
+            <button class="btn btn-outline btn-sm" onclick="cLookup()">Search</button>
+            <div class="resp-box" id="c-lu-r" style="display:none"></div>
+          </div>
+        </div>
+        <div class="console-card">
+          <div class="console-head"><span class="method-badge m-get">GET</span><span class="ep-path">/api/v1/generate_mac</span></div>
+          <div class="console-body">
+            <p style="font-size:12px;color:#6b7280;margin-bottom:12px;line-height:1.6">Generate a unique CEJO OUI MAC address (C0:EF prefix) for manual device assignment.</p>
+            <button class="btn btn-outline btn-sm" onclick="cGenMac()">Generate MAC</button>
+            <div class="resp-box" id="c-mac-r" style="display:none"></div>
+          </div>
+        </div>
+        <div class="console-card" style="grid-column:1/-1">
+          <div class="console-head"><span class="method-badge m-get">GET</span><span class="ep-path">/api/v1/status — Full hierarchical status</span></div>
+          <div class="console-body">
+            <button class="btn btn-outline btn-sm" onclick="cStatus()">Fetch Full Status</button>
+            <div class="resp-box" id="c-status-r" style="display:none;max-height:300px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-servicenow" class="panel">
+      <div class="sn-card">
+        <div class="sn-card-head"><div><div class="sn-card-title">Setup Checklist</div><div class="sn-card-sub">Before running scripts in ServiceNow PDI</div></div></div>
+        <div class="sn-card-body">
+          <div class="setup-steps">
+            <b>1.</b> Deploy CEJO online and get your public URL<br>
+            <b>2.</b> In ServiceNow PDI: <code>System Web Services → Scripted REST APIs → New</code><br>
+            <b>3.</b> Create a Resource, paste the script, set HTTP Method<br>
+            <b>4.</b> Replace <code>cejo-ipam.onrender.com</code> with your actual CEJO URL<br>
+            <b>5.</b> Test using header <code>X-CEJO-API-Key: cejo-api-2024</code>
+          </div>
+        </div>
+      </div>
+      <div class="sn-card">
+        <div class="sn-card-head"><div><div class="sn-card-title">1 — Allocate IP from ServiceNow</div><div class="sn-card-sub">Scripted REST API · POST</div></div><button class="copy-btn" onclick="copyEl('sn1')">Copy</button></div>
+        <div class="sn-card-body"><pre class="code" id="sn1">(function process(request, response) {
+  var CEJO = 'https://cejo-ipam.onrender.com';
+  var KEY  = 'cejo-api-2024';
+  var body = request.body.data;
+  var rm = new sn_ws.RESTMessageV2();
+  rm.setEndpoint(CEJO + '/api/v1/allocate_ip');
+  rm.setHttpMethod('POST');
+  rm.setRequestHeader('Content-Type', 'application/json');
+  rm.setRequestHeader('X-CEJO-API-Key', KEY);
+  rm.setRequestBody(JSON.stringify({
+    network_cidr: body.network_cidr || '10.0.10.0/24',
+    device_name:  body.device_name,
+    device_type:  body.device_type || 'Server',
+    owner:        body.owner || gs.getUserName()
+  }));
+  var r    = rm.execute();
+  var code = r.getStatusCode();
+  var data = JSON.parse(r.getBody());
+  if (code === 201) {
+    var ci = new GlideRecord('cmdb_ci_ip_address');
+    ci.newRecord();
+    ci.setValue('ip_address',  data.ip);
+    ci.setValue('mac_address', data.mac);
+    ci.setValue('name',        data.device);
+    ci.insert();
+  }
+  response.setStatus(code);
+  response.setBody(data);
+})(request, response);</pre></div>
+      </div>
+      <div class="sn-card">
+        <div class="sn-card-head"><div><div class="sn-card-title">2 — Release IP from ServiceNow</div><div class="sn-card-sub">Scripted REST API · POST</div></div><button class="copy-btn" onclick="copyEl('sn2')">Copy</button></div>
+        <div class="sn-card-body"><pre class="code" id="sn2">(function process(request, response) {
+  var CEJO = 'https://cejo-ipam.onrender.com';
+  var KEY  = 'cejo-api-2024';
+  var ip   = request.body.data.ip_address;
+  var rm = new sn_ws.RESTMessageV2();
+  rm.setEndpoint(CEJO + '/api/v1/release_ip');
+  rm.setHttpMethod('POST');
+  rm.setRequestHeader('Content-Type', 'application/json');
+  rm.setRequestHeader('X-CEJO-API-Key', KEY);
+  rm.setRequestBody(JSON.stringify({ ip_address: ip }));
+  var r    = rm.execute();
+  var data = JSON.parse(r.getBody());
+  if (r.getStatusCode() === 200) {
+    var ci = new GlideRecord('cmdb_ci_ip_address');
+    ci.addQuery('ip_address', ip);
+    ci.query();
+    if (ci.next()) { ci.setValue('install_status', 7); ci.update(); }
+  }
+  response.setStatus(r.getStatusCode());
+  response.setBody(data);
+})(request, response);</pre></div>
+      </div>
+      <div class="sn-card">
+        <div class="sn-card-head"><div><div class="sn-card-title">3 — curl Test Commands</div><div class="sn-card-sub">Verify from Terminal or Postman</div></div><button class="copy-btn" onclick="copyEl('sn3')">Copy</button></div>
+        <div class="sn-card-body"><pre class="code" id="sn3"># Health check
+curl https://cejo-ipam.onrender.com/health
+
+# Full status
+curl -H "X-CEJO-API-Key: cejo-api-2024" \
+  https://cejo-ipam.onrender.com/api/v1/status
+
+# Add device (auto IP+MAC)
+curl -X POST \
+  -H "X-CEJO-API-Key: cejo-api-2024" \
+  -H "Content-Type: application/json" \
+  -d '{"network_cidr":"10.0.10.0/24","name":"test-srv","device_type":"Server"}' \
+  https://cejo-ipam.onrender.com/api/v1/add_device
+
+# Release IP
+curl -X POST \
+  -H "X-CEJO-API-Key: cejo-api-2024" \
+  -H "Content-Type: application/json" \
+  -d '{"ip_address":"10.0.10.20"}' \
+  https://cejo-ipam.onrender.com/api/v1/release_ip</pre></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-bg" id="editModal" style="display:none" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">Edit Device <button class="modal-close" onclick="closeModal()">×</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="fg"><label>Device Name</label><input class="inp" id="m-name" style="width:100%"></div>
+      <div class="fg"><label>Device Type</label><select class="sel" id="m-type" style="width:100%"><option>Computer</option><option>Server</option><option>Router</option><option>Switch</option><option>Firewall</option><option>Gear</option><option>AP</option></select></div>
+      <div class="fg"><label>Owner</label><input class="inp" id="m-owner" style="width:100%"></div>
+      <div class="fg"><label>Description</label><input class="inp" id="m-desc" style="width:100%"></div>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="saveEdit()">Save</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const KEY = document.getElementById('apiKeyShow').textContent.trim();
+let allDevices = [], editingIp = null;
+
+async function api(path, opts={}) {
+  const h = {'X-CEJO-API-Key': KEY, 'Content-Type': 'application/json', ...opts.headers};
+  const r = await fetch(path, {...opts, headers: h});
+  return {status: r.status, data: await r.json()};
+}
+
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
+}
+
+function setResp(id, status, data) {
+  const el = document.getElementById(id);
+  el.style.display = 'block';
+  el.textContent = JSON.stringify(data, null, 2);
+  el.className = 'resp-box ' + (status < 300 ? 'ok' : 'err');
+}
+
+function typeClass(t) {
+  const m = {Computer:'b-computer',Server:'b-server',Router:'b-router',Switch:'b-switch',Firewall:'b-firewall',Gear:'b-gear',AP:'b-ap'};
+  return m[t] || 'b-computer';
+}
+
+function typeIcon(t) {
+  const m = {Computer:'🖥',Server:'🗄',Router:'🔀',Switch:'🔄',Firewall:'🛡',Gear:'⚙',AP:'📶'};
+  return m[t] || '📦';
+}
+
+function navTo(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = {topology:'Topology',devices:'All Devices',console:'API Console',servicenow:'ServiceNow Integration','add-block':'Add IP Block','add-network':'Add Network','add-device':'Add Device'};
+  const subs = {topology:'Block → Network → Device hierarchy',devices:'View and manage all registered devices',console:'Live interaction with CEJO REST API',servicenow:'Code snippets for ServiceNow PDI','add-block':'Create a new top-level IP block','add-network':'Create a subnet within a block','add-device':'Register a device and allocate IP/MAC'};
+  document.getElementById('pageTitle').textContent = titles[id] || id;
+  document.getElementById('pageSub').textContent = subs[id] || '';
+  if (id === 'devices') loadDevices();
+  if (['add-network','add-device','console'].includes(id)) loadSelects();
+}
+
+function refreshAll() { loadTopology(); loadSelects(); }
+
+async function loadTopology() {
+  const {data: sum} = await api('/api/v1/summary');
+  document.getElementById('kBlocks').textContent = sum.blocks || 0;
+  document.getElementById('kNets').textContent   = sum.networks || 0;
+  document.getElementById('kAvail').textContent  = sum.ip_addresses?.available || 0;
+  document.getElementById('kAlloc').textContent  = sum.ip_addresses?.allocated || 0;
+  document.getElementById('kDevs').textContent   = sum.devices?.total || 0;
+  document.getElementById('kUtil').textContent   = (sum.ip_addresses?.utilization_pct || 0) + '%';
+  document.getElementById('sbStatus').textContent = 'CEJO Online';
+
+  const {data} = await api('/api/v1/status');
+  document.getElementById('topologyTree').innerHTML = (data.blocks || []).map(b => blockHtml(b)).join('');
+}
+
+function blockHtml(b) {
+  const nets = (b.networks || []).map(n => netHtml(n)).join('');
+  return `<div class="block-card open" id="blk-${b.id}">
+    <div class="block-head" onclick="toggleBlock(${b.id})">
+      <div class="block-icon">🏢</div>
+      <div><div class="block-name">${b.name}</div><div class="block-cidr">${b.cidr}</div></div>
+      <span style="font-size:12px;color:#6b7280;margin-left:8px">${b.networks?.length||0} networks</span>
+      ${b.location?`<span style="margin-left:8px;font-size:12px;color:#9ca3af">📍 ${b.location}</span>`:''}
+      <span class="block-arrow" style="margin-left:auto">▶</span>
+    </div>
+    <div class="net-list" id="bnet-${b.id}">${nets||'<div style="padding:12px;font-size:12px;color:#9ca3af">No networks</div>'}</div>
+  </div>`;
+}
+
+function netHtml(n) {
+  const pct = n.stats?.utilization_pct || 0;
+  const fc  = pct < 50 ? 'uf-low' : pct < 80 ? 'uf-mid' : 'uf-hi';
+  const devRows = (n.devices||[]).map(d => `<tr>
+    <td>${typeIcon(d.device_type)} <strong>${d.name}</strong></td>
+    <td><span class="badge ${typeClass(d.device_type)}">${d.device_type}</span></td>
+    <td class="mono">${d.ip}</td>
+    <td class="mono" style="color:#6b7280">${d.mac_address||'—'}</td>
+    <td>${d.owner||'—'}</td>
+    <td>
+      <button class="btn btn-outline btn-sm" style="padding:3px 8px;font-size:11px" onclick="openEdit('${d.ip}','${d.name}','${d.device_type}','${d.owner||''}','${d.description||''}')">Edit</button>
+      <button class="btn btn-sm" style="padding:3px 8px;font-size:11px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca" onclick="quickRelease('${d.ip}','${d.name}')">Release</button>
+    </td>
+  </tr>`).join('');
+  return `<div class="net-row" id="net-${n.id}">
+    <div class="net-head" onclick="toggleNet(${n.id})">
+      <span style="color:#9ca3af;font-size:11px">▶</span>
+      <div><div class="net-name">${n.name}</div><div class="net-cidr">${n.cidr}</div></div>
+      ${n.vlan_id?`<span class="vlan-chip">VLAN ${n.vlan_id}</span>`:''}
+      <div class="net-stats">
+        <span class="stat-chip sc-free">${n.stats?.available||0} free</span>
+        <span class="stat-chip sc-used">${n.stats?.allocated||0} used</span>
+        <span class="stat-chip sc-res">${n.stats?.reserved||0} res</span>
+      </div>
+    </div>
+    <div class="util-bar-wrap">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;margin-bottom:3px"><span>Utilization</span><span>${pct}%</span></div>
+      <div class="util-bar"><div class="util-fill ${fc}" style="width:${pct}%"></div></div>
+    </div>
+    <div class="dev-tbl-wrap open" id="dtw-${n.id}">
+      ${devRows?`<table class="dev-tbl"><thead><tr><th>Device</th><th>Type</th><th>IP</th><th>MAC</th><th>Owner</th><th>Actions</th></tr></thead><tbody>${devRows}</tbody></table>`:'<div class="no-devs">No devices in this network</div>'}
+    </div>
+  </div>`;
+}
+
+function toggleBlock(id) {
+  const card = document.getElementById('blk-'+id);
+  const list = document.getElementById('bnet-'+id);
+  card.classList.toggle('open');
+  list.style.display = card.classList.contains('open') ? '' : 'none';
+}
+function toggleNet(id) { document.getElementById('dtw-'+id).classList.toggle('open'); }
+
+async function loadDevices() {
+  const {data} = await api('/api/v1/devices');
+  allDevices = data.devices || [];
+  renderDevTable(allDevices);
+}
+
+function renderDevTable(devs) {
+  document.getElementById('devCount').textContent = devs.length + ' devices';
+  const tbody = document.getElementById('devTableBody');
+  if (!devs.length) { tbody.innerHTML = '<tr><td colspan="8" style="color:#9ca3af;padding:20px">No devices found</td></tr>'; return; }
+  tbody.innerHTML = devs.map(d => `<tr>
+    <td><strong>${d.name}</strong></td>
+    <td><span class="badge ${typeClass(d.device_type)}">${d.device_type}</span></td>
+    <td class="mono">${d.ip}</td>
+    <td class="mono text-muted">${d.mac_address||'—'}</td>
+    <td class="mono text-sm text-muted">${d.network_cidr}</td>
+    <td class="text-sm text-muted">${d.block_name}</td>
+    <td class="text-sm">${d.owner||'—'}</td>
+    <td>
+      <button class="btn btn-outline btn-sm" style="padding:3px 8px;font-size:11px" onclick="openEdit('${d.ip}','${d.name}','${d.device_type}','${d.owner||''}','${d.description||''}')">Edit</button>
+      <button class="btn btn-sm" style="padding:3px 8px;font-size:11px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca" onclick="quickRelease('${d.ip}','${d.name}')">Release</button>
+    </td>
+  </tr>`).join('');
+}
+
+function filterDevices() {
+  const q = document.getElementById('devSearch').value.toLowerCase();
+  const t = document.getElementById('devTypeFilter').value;
+  renderDevTable(allDevices.filter(d =>
+    (!t || d.device_type === t) &&
+    (!q || [d.name,d.ip,d.mac_address,d.owner,d.network_cidr].some(v => (v||'').toLowerCase().includes(q)))
+  ));
+}
+
+async function quickRelease(ip, name) {
+  if (!confirm('Release '+ip+' from "'+name+'"?')) return;
+  const {status,data} = await api('/api/v1/release_ip',{method:'POST',body:JSON.stringify({ip_address:ip})});
+  if (status===200) { toast('IP '+ip+' released'); loadTopology(); loadDevices(); }
+  else toast('Error: '+data.error,'err');
+}
+
+function openEdit(ip, name, type, owner, desc) {
+  editingIp = ip;
+  document.getElementById('m-name').value = name;
+  document.getElementById('m-type').value = type;
+  document.getElementById('m-owner').value = owner;
+  document.getElementById('m-desc').value = desc;
+  document.getElementById('editModal').style.display = 'flex';
+}
+function closeModal() { document.getElementById('editModal').style.display='none'; editingIp=null; }
+async function saveEdit() { toast('Changes saved'); closeModal(); }
+
+async function doCreateBlock() {
+  const body = {name:document.getElementById('b-name').value,cidr:document.getElementById('b-cidr').value,location:document.getElementById('b-loc').value,description:document.getElementById('b-desc').value};
+  const {status,data} = await api('/api/v1/create_block',{method:'POST',body:JSON.stringify(body)});
+  setResp('b-resp',status,data);
+  if (status===201) { toast('Block created!'); loadTopology(); loadSelects(); }
+  else toast('Error: '+data.error,'err');
+}
+
+async function doCreateNetwork() {
+  const body = {block_cidr:document.getElementById('n-block').value,name:document.getElementById('n-name').value,cidr:document.getElementById('n-cidr').value,gateway:document.getElementById('n-gw').value||undefined,vlan_id:document.getElementById('n-vlan').value||undefined,description:document.getElementById('n-desc').value};
+  const {status,data} = await api('/api/v1/create_network',{method:'POST',body:JSON.stringify(body)});
+  setResp('n-resp',status,data);
+  if (status===201) { toast('Network created!'); loadTopology(); loadSelects(); }
+  else toast('Error: '+data.error,'err');
+}
+
+async function doAddDevice() {
+  const body = {network_cidr:document.getElementById('d-net').value,name:document.getElementById('d-name').value,device_type:document.getElementById('d-type').value,owner:document.getElementById('d-owner').value,description:document.getElementById('d-desc').value};
+  const ip = document.getElementById('d-ip').value.trim();
+  if (ip) body.ip = ip;
+  const {status,data} = await api('/api/v1/add_device',{method:'POST',body:JSON.stringify(body)});
+  setResp('d-resp',status,data);
+  if (status===201) { toast(data.device+' → '+data.ip_address); loadTopology(); }
+  else toast('Error: '+data.error,'err');
+}
+
+async function loadSelects() {
+  const {data:bd} = await api('/api/v1/blocks');
+  const {data:nd} = await api('/api/v1/networks');
+  const blocks = bd.blocks||[]; const nets = nd.networks||[];
+  ['n-block'].forEach(id => {
+    const s = document.getElementById(id);
+    if (s) s.innerHTML = '<option value="">— Select Block —</option>' + blocks.map(b=>`<option value="${b.cidr}">${b.name} (${b.cidr})</option>`).join('');
+  });
+  ['d-net','c-alloc-net'].forEach(id => {
+    const s = document.getElementById(id);
+    if (s) s.innerHTML = '<option value="">— Select Network —</option>' + nets.map(n=>`<option value="${n.cidr}">${n.name} (${n.cidr})</option>`).join('');
+  });
+}
+
+async function cAllocate() {
+  const body = {network_cidr:document.getElementById('c-alloc-net').value,device_name:document.getElementById('c-alloc-dev').value,device_type:document.getElementById('c-alloc-type').value,owner:document.getElementById('c-alloc-owner').value};
+  const ip = document.getElementById('c-alloc-ip').value.trim();
+  if (ip) body.ip = ip;
+  const {status,data} = await api('/api/v1/allocate_ip',{method:'POST',body:JSON.stringify(body)});
+  setResp('c-alloc-r',status,data);
+  if (status===201) loadTopology();
+}
+async function cRelease() {
+  const {status,data} = await api('/api/v1/release_ip',{method:'POST',body:JSON.stringify({ip_address:document.getElementById('c-rel-ip').value.trim()})});
+  setResp('c-rel-r',status,data);
+  if (status===200) loadTopology();
+}
+async function cLookup() {
+  const t=document.getElementById('c-lu-type').value;
+  const v=document.getElementById('c-lu-val').value.trim();
+  const {status,data} = await api('/api/v1/lookup?'+t+'='+encodeURIComponent(v));
+  setResp('c-lu-r',status,data);
+}
+async function cGenMac() { const {status,data}=await api('/api/v1/generate_mac'); setResp('c-mac-r',status,data); }
+async function cStatus() { const {status,data}=await api('/api/v1/status'); setResp('c-status-r',status,data); }
+
+function copyEl(id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent);
+  event.target.textContent='Copied!';
+  setTimeout(()=>event.target.textContent='Copy',1800);
+}
+
+loadTopology(); loadSelects();
+</script>
+</body>
+</html>
 
